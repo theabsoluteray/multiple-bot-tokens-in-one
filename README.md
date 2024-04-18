@@ -4,11 +4,11 @@ just a radnom script which supports multiple bot tokens
 
 # features
 
-**massban** - u need put the member ids in scrape.txt
+**massban** - u need to put the member ids in scrape.txt
 
 **spam** - can spam in all channels of a server
 
-**play** - u can play the audio too juat put the audio file and name that file ray.mp3
+**play** - u can play the audio too just put the audio file and name that file ray.mp3
 
 **join** - to join the vc 
 
