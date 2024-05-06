@@ -16,3 +16,4 @@ just a radnom script which supports multiple bot tokens
 
 
 # u can use jishaku to do some tasks too
+# ffmpeg is required make sure to install that 
